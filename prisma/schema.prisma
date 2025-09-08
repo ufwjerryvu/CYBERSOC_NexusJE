@@ -21,17 +21,18 @@ model User {
 }
 
 model Post {
-  id           Int      @id @default(autoincrement())
-  userId       String
-  creationDate DateTime @default(now())
-  postEdited   Boolean  @default(false)
-  categories   String
-  isPrivate    Boolean  @default(false)
-  isAnonymous  Boolean  @default(false)
-  isReported   Boolean  @default(false)
-  title        String
-  description  String
-  images       String?   // JSON string for images
+  id             Int      @id @default(autoincrement())
+  userId         String
+  creationDate   DateTime @default(now())
+  postEdited     Boolean  @default(false)
+  categories     String
+  parent_category String
+  isPrivate      Boolean  @default(false)
+  isAnonymous    Boolean  @default(false)
+  isReported     Boolean  @default(false)
+  title          String
+  description    String
+  images         String?   // JSON string for images
 
   user     User     @relation(fields: [userId], references: [id])
   comments Comment[]

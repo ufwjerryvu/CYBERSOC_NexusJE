@@ -2,11 +2,40 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "@/styles/navbar.css";
 
 export default function Navbar() {
 	const [isOpen, setIsOpen] = useState(false);
+	const [loggedEmail, setLoggedEmail] = useState<string | null>(null);
+
+	useEffect(() => {
+		try {
+			const e = localStorage.getItem("nexus_forum_email");
+			setLoggedEmail(e);
+		} catch (err) {
+			// ignore
+		}
+
+		function onStorage(ev: StorageEvent) {
+			if (ev.key === "nexus_forum_email") setLoggedEmail(ev.newValue);
+		}
+
+		window.addEventListener("storage", onStorage);
+
+		return () => window.removeEventListener("storage", onStorage);
+	}, []);
+
+	function handleLogout() {
+		try {
+			localStorage.removeItem("nexus_forum_email");
+			setLoggedEmail(null);
+			// reload to reset UI
+			window.location.reload();
+		} catch (err) {
+			console.error(err);
+		}
+	}
 
 	return (
 		<header className="nx-navbar" role="banner">
@@ -36,9 +65,11 @@ export default function Navbar() {
 					<Link href="/terminal" className="nx-link" onClick={() => setIsOpen(false)}>
 						Terminal
 					</Link>
-					<Link href="/api/auth/signin" className="nx-cta" onClick={() => setIsOpen(false)}>
-						Sign In
-					</Link>
+					{loggedEmail ? (
+						<button className="nx-cta" onClick={handleLogout}>Logout</button>
+					) : (
+						<Link href="/api/auth/signin" className="nx-cta" onClick={() => setIsOpen(false)}>Sign In</Link>
+					)}
 				</nav>
 			</div>
 			<div className="nx-glow" aria-hidden="true" />

@@ -1,51 +1,36 @@
 import 'dotenv/config';
+// prisma/seed.js
 import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create a user
-  const user = await prisma.user.create({
+  // Create Admin User
+  const admin = await prisma.user.create({
     data: {
-      email: "erik@hai.com",
-      username: "ehai",
+      email: 'admin@example.com',
+      username: 'adminuser',
+      isAdmin: true,
+    },
+  });
+
+  // Create Regular User
+  const regular = await prisma.user.create({
+    data: {
+      email: 'user@example.com',
+      username: 'regularuser',
       isAdmin: false,
     },
   });
-  console.log("User created:", user);
 
-  // Create a post linked to that user
-  const post = await prisma.post.create({
-    data: {
-      title: "Test Post",
-      description: "i need a job",
-      categories: "PEP Hours",
-      user: { connect: { id: user.id } } // connect relation correctly
-    },
-  });
-  console.log("Post created:", post);
-
-  // Create a comment linked to the post and user
-  const comment = await prisma.comment.create({
-    data: {
-      content: "This is a test comment",
-      images: JSON.stringify([]),
-      user: { connect: { id: user.id } },
-      post: { connect: { id: post.id } },
-    },
-  });
-  console.log("Comment created:", comment);
-
-  // Fetch posts with user and comments
-  const postsWithComments = await prisma.post.findMany({
-    include: {
-      user: true,
-      comments: true,
-    },
-  });
-  console.log("Posts with comments:", postsWithComments);
+  console.log({ admin, regular });
 }
 
 main()
-  .catch((e) => console.error(e))
-  .finally(async () => await prisma.$disconnect());
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });
